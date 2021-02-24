@@ -32,3 +32,37 @@ def load_team_data():
                                       'TEAM_NAME_y', 'TEAM_CITY_y',
                                       'MIN_y'])
     return full_df
+
+
+def clean_team_data(df):
+    """This function cleans the team_data
+    1) Changes W/L to 1/0 
+    2) Changes franchise abbreviations to their most 
+    recent abbreviation for consistency
+    3) Converts GAME_DATE to datetime object
+    4) Creates a binary column 'HOME_GAME'
+    """
+    df = df.copy()
+    df['WL'] = (df['WL'] == 'W').astype(int)
+    
+    abbr_mapping = {'NJN':'BKN',
+                   'CHH':'CHA',
+                   'VAN':'MEM',
+                   'NOH':'NOP',
+                   'NOK':'NOP',
+                   'SEA':'OKC'}
+    
+    df['TEAM_ABBREVIATION'] = df['TEAM_ABBREVIATION'].replace(abbr_mapping)
+    df['MATCHUP'] = df['MATCHUP'].str.replace('NJN', 'BKN')
+    df['MATCHUP'] = df['MATCHUP'].str.replace('CHH', 'CHA')
+    df['MATCHUP'] = df['MATCHUP'].str.replace('VAN', 'MEM')
+    df['MATCHUP'] = df['MATCHUP'].str.replace('NOH', 'NOP')
+    df['MATCHUP'] = df['MATCHUP'].str.replace('NOK', 'NOP')
+    df['MATCHUP'] = df['MATCHUP'].str.replace('SEA', 'OKC')
+
+
+    df['GAME_DATE'] = pd.to_datetime(df['GAME_DATE'])
+    
+    df['HOME_GAME'] = df['MATCHUP'].str.contains('vs').astype(int)
+    
+    return df
