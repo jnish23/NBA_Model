@@ -1,4 +1,5 @@
 import pandas as pd
+from tqdm import tqdm
 
 def load_team_data():
     """Loads basic, advanced, and scoring boxscores from
@@ -82,7 +83,7 @@ def prep_for_aggregation(df):
                          'OREB_PCT', 'REB_PCT', 'AST_PCT', 'AST_TOV',
                           'AST_RATIO', 'E_TM_TOV_PCT', 'TM_TOV_PCT',
                           'EFG_PCT', 'TS_PCT', 'USG_PCT', 'E_USG_PCT',
-                          'E_PACE', 'PACE', 'PACE_PER40'])
+                          'PACE', 'PACE_PER40'])
     
     df['FG2M'] = df['FGM'] - df['FG3M']
     df['FG2A'] = df['FGA'] - df['FG3A']
@@ -103,9 +104,12 @@ def prep_for_aggregation(df):
                             'PCT_AST_FGM', 'PCT_UAST_FGM', 
                             'FGM', 'FGA'])
 
+    df['point_diff'] = df['PLUS_MINUS']
+    df['RECORD'] = df['WL']
+    
     df = df[['SEASON_YEAR', 'SEASON_ID', 'TEAM_ID',
-      'TEAM_ABBREVIATION', 'TEAM_NAME', 'GAME_ID',
-      'GAME_DATE', 'MATCHUP', 'HOME_GAME', 'WL', 'MIN',
+      'TEAM_ABBREVIATION', 'TEAM_NAME', 'GAME_ID', 'GAME_DATE',
+      'MATCHUP', 'HOME_GAME', 'point_diff', 'WL', 'MIN', 'RECORD',
       'FG2M', 'FG2A', 'FG3M', 'FG3A', 'FTM', 'FTA',
       'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF',
       'PTS', 'PLUS_MINUS', 'E_OFF_RATING', 'OFF_RATING', 
@@ -115,3 +119,37 @@ def prep_for_aggregation(df):
 
     
     return df
+
+
+def create_matchups(df):
+    """This function makes each row a matchup between 
+    team and opp"""
+    df = df.copy()
+    matchups = pd.merge(df, df, on=['GAME_ID'], suffixes=['_team', '_opp'])
+    matchups = matchups.loc[matchups['TEAM_ABBREVIATION_team'] != matchups['TEAM_ABBREVIATION_opp']]
+    
+    return matchups
+
+
+def get_team_and_opp_avg(df, min_periods=5):
+    df = df.copy()
+
+    df = df.drop(columns = ['SEASON_YEAR_opp', 'SEASON_ID_opp', 
+                            'TEAM_ID_opp', 'TEAM_ABBREVIATION_opp',
+                            'TEAM_NAME_opp', 'GAME_DATE_opp', 
+                            'MATCHUP_opp', 'WL_opp', 'HOME_GAME_opp',
+                           'point_diff_opp'])
+
+    team_dfs = []
+    for season in tqdm(df['SEASON_YEAR_team'].unique(), desc='Progress'):
+        season_df = df.loc[df['SEASON_YEAR_team'] == season]
+        for team in df['TEAM_ABBREVIATION_team'].unique():
+            team_df = season_df.loc[season_df['TEAM_ABBREVIATION_team'] == team].sort_values('GAME_DATE_team')
+            team_df.iloc[:, 11:] = team_df.iloc[:, 11:].shift(1).rolling(10, min_periods=min_periods).mean()
+            team_dfs.append(team_df)
+
+    new_df = pd.concat(team_dfs)
+    
+    new_df = new_df.dropna()
+    
+    return new_df
