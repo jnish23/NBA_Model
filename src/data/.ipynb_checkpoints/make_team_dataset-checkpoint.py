@@ -149,7 +149,16 @@ def get_team_and_opp_avg(df, min_periods=5):
             team_dfs.append(team_df)
 
     new_df = pd.concat(team_dfs)
-    
-    new_df = new_df.dropna()
-    
+        
     return new_df
+
+def add_rest_days(df):
+    df['rest'] = np.nan
+
+    for season in df['SEASON_YEAR_team'].unique():
+        season_df = df.loc[df['SEASON_YEAR_team'] == season]
+        for team in season_df['TEAM_ABBREVIATION_team'].unique():
+            team_df = season_df.loc[season_df['TEAM_ABBREVIATION_team'] == team]
+            idx = team_df.index
+            team_df['rest'] = (team_df['GAME_DATE_team'] - team_df['GAME_DATE_team'].shift(1)) / np.timedelta64(1, 'D')
+            df.loc[idx, 'rest'] = team_df['rest']

@@ -1,7 +1,8 @@
 import pandas as pd
+import numpy as np
 
 
-def add_team_features(df):
+def add_percentage_features(df):
     """Add the following features for both team and opp:
     OREB_PCT, DREB_PCT, REB_PCT, TS_PCT, EFG_PCT, AST_RATIO, TOV_PCT.
     """
@@ -64,4 +65,18 @@ def add_team_features(df):
        'UAST_3PM_opp', 'OREB_PCT_opp', 'DREB_PCT_opp', 'REB_PCT_opp', 
        'TS_PCT_opp',  'EFG_PCT_opp', 'AST_RATIO_opp',  'TOV_PCT_opp']]
     
+    return df
+
+
+def add_rest_days(df):
+    df['rest'] = np.nan
+
+    for season in df['SEASON_YEAR_team'].unique():
+        season_df = df.loc[df['SEASON_YEAR_team'] == season]
+        for team in season_df['TEAM_ABBREVIATION_team'].unique():
+            team_df = season_df.loc[season_df['TEAM_ABBREVIATION_team'] == team]
+            idx = team_df.index
+            team_df['rest'] = (team_df['GAME_DATE_team'] - team_df['GAME_DATE_team'].shift(1)) / np.timedelta64(1, 'D')
+            df.loc[idx, 'rest'] = team_df['rest']
+            
     return df

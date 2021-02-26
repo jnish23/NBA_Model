@@ -149,7 +149,6 @@ def get_team_and_opp_avg(df, min_periods=5):
             team_dfs.append(team_df)
 
     new_df = pd.concat(team_dfs)
-    
-    new_df = new_df.dropna()
-    
+        
     return new_df
+
