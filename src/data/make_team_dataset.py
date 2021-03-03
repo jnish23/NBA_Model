@@ -106,10 +106,11 @@ def prep_for_aggregation(df):
 
     df['point_diff'] = df['PLUS_MINUS']
     df['RECORD'] = df['WL']
+    df['TEAM_SCORE'] = df['PTS']
     
     df = df[['SEASON_YEAR', 'SEASON_ID', 'TEAM_ID',
       'TEAM_ABBREVIATION', 'TEAM_NAME', 'GAME_ID', 'GAME_DATE',
-      'MATCHUP', 'HOME_GAME', 'point_diff', 'WL', 'MIN', 'RECORD',
+      'MATCHUP', 'HOME_GAME', 'TEAM_SCORE', 'point_diff', 'WL', 'MIN', 'RECORD',
       'FG2M', 'FG2A', 'FG3M', 'FG3A', 'FTM', 'FTA',
       'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TOV', 'PF',
       'PTS', 'PLUS_MINUS', 'E_OFF_RATING', 'OFF_RATING', 
@@ -127,7 +128,6 @@ def create_matchups(df):
     df = df.copy()
     matchups = pd.merge(df, df, on=['GAME_ID'], suffixes=['_team', '_opp'])
     matchups = matchups.loc[matchups['TEAM_ABBREVIATION_team'] != matchups['TEAM_ABBREVIATION_opp']]
-    
     return matchups
 
 
@@ -145,10 +145,11 @@ def get_team_and_opp_avg(df, min_periods=5):
         season_df = df.loc[df['SEASON_YEAR_team'] == season]
         for team in df['TEAM_ABBREVIATION_team'].unique():
             team_df = season_df.loc[season_df['TEAM_ABBREVIATION_team'] == team].sort_values('GAME_DATE_team')
-            team_df.iloc[:, 11:] = team_df.iloc[:, 11:].shift(1).rolling(10, min_periods=min_periods).mean()
+            team_df.iloc[:, 12:] = team_df.iloc[:, 12:].shift(1).rolling(10, min_periods=min_periods).mean()
             team_dfs.append(team_df)
 
     new_df = pd.concat(team_dfs)
+    new_df = new_df.reset_index(drop=True)
         
     return new_df
 

@@ -18,13 +18,11 @@ def add_percentage_features(df):
     df['REB_PCT_team'] = df['REB_team'] / (df['REB_team'] + df['REB_opp'])
     df['REB_PCT_opp'] = df['REB_opp'] / (df['REB_opp'] + df['REB_team'])
 
-    df['TS_PCT_team'] = df['PTS_team'] / (2*(df['FG2A_team'] + df['FG3A_team']) 
-                                          + 0.44*df['FTA_team'])
+    df['TS_PCT_team'] = df['PTS_team'] / ((2*(df['FG2A_team'] + df['FG3A_team']) + 0.44*df['FTA_team']))
     
-    df['TS_PCT_opp'] = df['PTS_opp'] / (2*(df['FG2A_opp'] + df['FG3A_opp']) 
-                                        + 0.44*df['FTA_opp'])
+    df['TS_PCT_opp'] = df['PTS_opp'] / ((2*(df['FG2A_opp'] + df['FG3A_opp']) + 0.44*df['FTA_opp']))
 
-    df['EFG_PCT_team'] = (df['FG2M_team'] + 1.5*df['FG3M_team']) / (df['FG2A_team'] 
+    df['EFG_PCT_team'] = (df['FG2M_team'] + 1.5*df['FG3M_team']) / (df['FG2A_team']
                                                                     + df['FG3A_team'])
     df['EFG_PCT_opp'] = (df['FG2M_opp'] + 1.5*df['FG3M_opp']) / (df['FG2A_opp'] 
                                                                  + df['FG3A_opp'])
@@ -44,7 +42,7 @@ def add_percentage_features(df):
 
     df = df[['SEASON_YEAR_team', 'SEASON_ID_team', 'TEAM_ID_team',
        'TEAM_ABBREVIATION_team', 'TEAM_NAME_team', 'GAME_ID', 'GAME_DATE_team',
-       'MATCHUP_team', 'HOME_GAME_team', 'point_diff_team', 'WL_team',
+       'MATCHUP_team', 'HOME_GAME_team', 'TEAM_SCORE_team', 'point_diff_team', 'WL_team',
        'MIN_team', 'RECORD_team', 'FG2M_team', 'FG2A_team', 'FG3M_team',
        'FG3A_team', 'FTM_team', 'FTA_team', 'OREB_team', 'DREB_team',
        'REB_team', 'AST_team', 'STL_team', 'BLK_team', 'TOV_team', 'PF_team',
