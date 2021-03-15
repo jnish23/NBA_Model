@@ -72,7 +72,7 @@ def add_rest_days(df):
     for season in df['SEASON_YEAR_team'].unique():
         season_df = df.loc[df['SEASON_YEAR_team'] == season]
         for team in season_df['TEAM_ABBREVIATION_team'].unique():
-            team_df = season_df.loc[season_df['TEAM_ABBREVIATION_team'] == team]
+            team_df = season_df.loc[season_df['TEAM_ABBREVIATION_team'] == team].sort_values('GAME_DATE_team')
             idx = team_df.index
             team_df['rest'] = (team_df['GAME_DATE_team'] - team_df['GAME_DATE_team'].shift(1)) / np.timedelta64(1, 'D')
             df.loc[idx, 'rest'] = team_df['rest']
