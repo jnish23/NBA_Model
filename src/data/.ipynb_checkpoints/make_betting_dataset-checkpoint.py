@@ -51,6 +51,13 @@ def clean_spread_data(df):
         full_df.loc[full_df[col] == '-', col] = np.nan
         full_df.loc[full_df[col] == '-.', col] = 0
         
+    for col in full_df.columns[3:]:
+        full_df[col] = full_df[col].str.replace('[', '')
+        full_df[col] = full_df[col].str.replace(']', '')
+        full_df[col] = full_df[col].str.replace("'", '')
+        full_df[col] = full_df[col].str.strip()
+
+        
     for col in columns:
         full_df[col] = full_df[col].apply(lambda x: str(x)[:-1] if str(x)[-1] == '-' else x)
         full_df[col] = full_df[col].astype(float)

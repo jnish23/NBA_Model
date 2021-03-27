@@ -58,6 +58,8 @@ def update_advanced_boxscores(season = '2020-21'):
     current_team_boxscores = pd.read_csv('../data/current_season_data/team_advanced_boxscores_{}.csv'.format(season), dtype={'GAME_ID':'object'})
 
     current_game_ids = current_team_boxscores['GAME_ID'].unique()
+#     ids_with_nans = current_team_boxscores.loc[current_team_boxscores.isna().any(axis=1), 'GAME_ID'].unique()
+
     # get all GAME_IDs that are currently in my data
     
     # Get GAME_IDs for all games that have been played in season so far
@@ -65,9 +67,11 @@ def update_advanced_boxscores(season = '2020-21'):
     for season_type in ['Regular Season', 'Playoffs']:
         to_date_gamelogs = leaguegamelog.LeagueGameLog(season=season, season_type_all_star=season_type).get_data_frames()[0]
         to_date_game_ids.extend(to_date_gamelogs['GAME_ID'].unique())
-
+        
     # Determine which GAME_IDs are missing in my data
     missing_game_ids = set(to_date_game_ids) - set(current_game_ids)
+#     missing_game_ids.update(ids_with_nans)
+    
     num_games_updated = len(missing_game_ids)
     if num_games_updated == 0:
         print("Data is all up to date")
@@ -108,15 +112,17 @@ def update_scoring_boxscores(season='2020-21'):
   
     # get all GAME_IDs that are currently in my data
     current_game_ids = current_team_boxscores['GAME_ID'].unique()
+#     ids_with_nans = current_team_boxscores.loc[current_team_boxscores.isna().any(axis=1), 'GAME_ID'].unique()
 
     to_date_game_ids = []
     for season_type in ['Regular Season', 'Playoffs']:
         to_date_gamelogs = leaguegamelog.LeagueGameLog(season=season, season_type_all_star=season_type).get_data_frames()[0]
         to_date_game_ids.extend(to_date_gamelogs['GAME_ID'].unique())
-
-
+    
     # Determine which GAME_IDs are missing in my data
     missing_game_ids = set(to_date_game_ids) - set(current_game_ids)
+#     missing_game_ids.update(ids_with_nans)
+    
     num_games_updated = len(missing_game_ids)
     if num_games_updated == 0:
         print("Data is all up to date")
@@ -151,16 +157,20 @@ def update_tracking_boxscores(season='2020-21'):
     current_team_boxscores = pd.read_csv('../data/current_season_data/team_tracking_boxscores_{}.csv'.format(season), dtype={'GAME_ID':'object'})
 
     current_game_ids = current_team_boxscores['GAME_ID'].unique()
+#     ids_with_nans = current_team_boxscores.loc[current_team_boxscores.isna().any(axis=1), 'GAME_ID'].unique()
 
     # get all GAME_IDs that are currently in my data
     to_date_game_ids = []
     for season_type in ['Regular Season', 'Playoffs']:
         to_date_gamelogs = leaguegamelog.LeagueGameLog(season=season, season_type_all_star=season_type).get_data_frames()[0]
         to_date_game_ids.extend(to_date_gamelogs['GAME_ID'].unique())
-    
+        
     # Determine which GAME_IDs are missing in my data
     missing_game_ids = set(to_date_game_ids) - set(current_game_ids)
+#     missing_game_ids.update(ids_with_nans)
+    
     num_games_updated = len(missing_game_ids)
+    
     
     if num_games_updated == 0:
         print("Data is all up to date")
@@ -285,6 +295,8 @@ def update_moneyline_data(season='2020-21'):
 def update_spread_data(season='2020-21'):
     # Get Spreads
     current_spreads_df = pd.read_csv('../data/all_spreads_sbr.csv')
+    
+    dates_with_null_scores = current_spreads_df.loc[current_spreads_df['home_scoreboard'].isnull(), 'game_date'].tolist()
     current_dates = current_spreads_df['game_date'].unique()
     
     up_to_date_dates = []
@@ -293,6 +305,7 @@ def update_spread_data(season='2020-21'):
         up_to_date_dates.extend(to_date_gamelogs['GAME_DATE'].unique())
     
     missing_dates = set(up_to_date_dates) - set(current_dates)
+    missing_dates.update(dates_with_null_scores)
     print("Updating lines for {} days".format(len(missing_dates)))
 
 
@@ -382,13 +395,15 @@ def update_spread_data(season='2020-21'):
 
     updated_spreads = pd.concat([current_spreads_df, spreads_to_add_df])
     
+    updated_spreads = updated_spreads.drop_duplicates(subset=['away_team', 'home_team', 'game_date'], keep='last')
+    
     for col in updated_spreads.columns[3:]:
         updated_spreads[col] = updated_spreads[col].astype(str)
         updated_spreads[col] = updated_spreads[col].str.replace("[", "")
         updated_spreads[col] = updated_spreads[col].str.replace("]", "")
         updated_spreads[col] = updated_spreads[col].str.strip()
 
-    updated_spreads.to_csv('../data/all_spreads_sbr.csv', index=False)
+    updated_spreads.to_csv('../data/all_spreads_sbr_test.csv', index=False)
     
     return None
 
