@@ -290,7 +290,7 @@ def update_moneyline_data(season='2020-21'):
         updated_moneylines_df[col] = updated_moneylines_df[col].str.replace("]", "")
         updated_moneylines_df[col] = updated_moneylines_df[col].str.strip()
         
-    updated_moneylines_df.to_csv('../data/all_moneylines_sbr_test.csv', index=False)
+    updated_moneylines_df.to_csv('../data/all_moneylines_sbr.csv', index=False)
     
     return None
 

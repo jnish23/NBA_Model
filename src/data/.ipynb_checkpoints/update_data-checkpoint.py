@@ -219,6 +219,7 @@ def update_all_data(season='2020-21'):
 def update_moneyline_data(season='2020-21'):
     
     current_moneylines_df = pd.read_csv('../data/all_moneylines_sbr.csv')
+    
     current_dates = current_moneylines_df['game_date'].unique()
     
     up_to_date_dates = []
@@ -227,7 +228,8 @@ def update_moneyline_data(season='2020-21'):
         to_date_gamelogs = leaguegamelog.LeagueGameLog(season=season, season_type_all_star=season_type).get_data_frames()[0]
         up_to_date_dates.extend(to_date_gamelogs['GAME_DATE'].unique())
     
-    missing_dates = set(up_to_date_dates) - set(current_dates)
+    missing_dates = set(up_to_date_dates) - set(current_dates)    
+    
     print("Updating lines for {} days".format(len(missing_dates)))
     # Get Moneylines
 
@@ -280,6 +282,7 @@ def update_moneyline_data(season='2020-21'):
                  'home_moneyline':home_moneylines})
     
     updated_moneylines_df = pd.concat([current_moneylines_df, moneylines_to_add_df])
+    updated_moneylines_df.sort_values('game_date', inplace=True)
     
     for col in ['away_moneyline', 'home_moneyline']:
         updated_moneylines_df[col] = updated_moneylines_df[col].astype(str)
@@ -396,6 +399,7 @@ def update_spread_data(season='2020-21'):
     updated_spreads = pd.concat([current_spreads_df, spreads_to_add_df])
     
     updated_spreads = updated_spreads.drop_duplicates(subset=['away_team', 'home_team', 'game_date'], keep='last')
+    updated_spreads.sort_values('game_date', inplace=True)
     
     for col in updated_spreads.columns[3:]:
         updated_spreads[col] = updated_spreads[col].astype(str)
@@ -403,7 +407,7 @@ def update_spread_data(season='2020-21'):
         updated_spreads[col] = updated_spreads[col].str.replace("]", "")
         updated_spreads[col] = updated_spreads[col].str.strip()
 
-    updated_spreads.to_csv('../data/all_spreads_sbr_test.csv', index=False)
+    updated_spreads.to_csv('../data/all_spreads_sbr.csv', index=False)
     
     return None
 
