@@ -40,29 +40,6 @@ def add_percentage_features(df):
                                              + 0.44*df['FTA_opp'] 
                                              + df['TOV_opp'])
 
-    df = df[['SEASON_YEAR_team', 'SEASON_ID_team', 'TEAM_ID_team',
-       'TEAM_ABBREVIATION_team', 'TEAM_NAME_team', 'GAME_ID', 'GAME_DATE_team',
-       'MATCHUP_team', 'HOME_GAME_team', 'TEAM_SCORE_team', 'point_diff_team',
-       'WL_team', 'MIN_team', 'home_spread_mode', 'WL_record', 'ATS_record', 'RECORD_team',
-       'team_covered', 'FG2M_team', 'FG2A_team', 'FG3M_team', 'FG3A_team',
-       'FTM_team', 'FTA_team', 'OREB_team', 'DREB_team', 'REB_team',
-       'AST_team', 'STL_team', 'BLK_team', 'TOV_team', 'PF_team', 'PTS_team',
-       'PLUS_MINUS_team', 'E_OFF_RATING_team', 'OFF_RATING_team',
-       'E_DEF_RATING_team', 'DEF_RATING_team', 'E_NET_RATING_team',
-       'NET_RATING_team', 'POSS_team', 'PIE_team', 'PTS_2PT_MR_team',
-       'PTS_FB_team', 'PTS_OFF_TOV_team', 'PTS_PAINT_team', 'AST_2PM_team',
-       'UAST_2PM_team', 'AST_3PM_team', 'UAST_3PM_team', 'TEAM_SCORE_opp',
-       'MIN_opp', 'RECORD_opp', 'FG2M_opp', 'FG2A_opp', 'FG3M_opp', 'FG3A_opp',
-       'FTM_opp', 'FTA_opp', 'OREB_opp', 'DREB_opp', 'REB_opp', 'AST_opp',
-       'STL_opp', 'BLK_opp', 'TOV_opp', 'PF_opp', 'PTS_opp', 'PLUS_MINUS_opp',
-       'E_OFF_RATING_opp', 'OFF_RATING_opp', 'E_DEF_RATING_opp',
-       'DEF_RATING_opp', 'E_NET_RATING_opp', 'NET_RATING_opp', 'POSS_opp',
-       'PIE_opp', 'PTS_2PT_MR_opp', 'PTS_FB_opp', 'PTS_OFF_TOV_opp',
-       'PTS_PAINT_opp', 'AST_2PM_opp', 'UAST_2PM_opp', 'AST_3PM_opp',
-       'UAST_3PM_opp', 'OREB_PCT_team', 'OREB_PCT_opp', 'DREB_PCT_team', 'DREB_PCT_opp', 'REB_PCT_team',
-       'REB_PCT_opp', 'TS_PCT_team', 'TS_PCT_opp', 'EFG_PCT_team',
-       'EFG_PCT_opp', 'AST_RATIO_team', 'AST_RATIO_opp', 'TOV_PCT_team',
-       'TOV_PCT_opp', 'rest']]
     
     return df
 
