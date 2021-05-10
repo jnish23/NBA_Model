@@ -87,3 +87,65 @@ def get_days_spreads(date):
         todays_spreads[col] = todays_spreads[col].str.strip()
         
     return todays_spreads
+
+
+
+def get_days_spreads_1H(date):
+    """INPUTS
+    date: "yyyy-mm-dd"
+    OUPUTS: dataframe with game 1H spreads
+    """
+    gm_date = []
+    away_teams = []
+    home_teams = []
+    away_spreads = []
+    home_spreads = []
+    
+    web = 'https://www.sportsbookreview.com/betting-odds/nba-basketball/pointspread/1st-half/?date={}'.format(date)
+    path = '../chromedriver.exe'
+    driver = webdriver.Chrome(path)
+    driver.get(web)
+    sleep(2)
+
+
+    single_row_events = driver.find_elements_by_class_name('eventMarketGridContainer-3QipG')
+
+    num_postponed_events = len(driver.find_elements_by_class_name('eventStatus-3EHqw'))
+
+    num_listed_events = len(single_row_events)
+    cutoff = num_listed_events - num_postponed_events
+
+    for event in single_row_events[:cutoff]:
+
+        away_team = event.find_elements_by_class_name('participantBox-3ar9Y')[0].text
+        home_team = event.find_elements_by_class_name('participantBox-3ar9Y')[1].text
+        away_teams.append(away_team)
+        home_teams.append(home_team)
+        gm_date.append(date)
+
+        spreads = event.find_elements_by_class_name('pointer-2j4Dk')
+        away_lines = []
+        home_lines = []
+        for i in range(len(spreads)):    
+            if i % 2 == 0:
+                away_lines.append(spreads[i].text)
+            else:
+                home_lines.append(spreads[i].text)
+        away_spreads.append(away_lines)
+        home_spreads.append(home_lines)
+
+    driver.quit()
+
+    todays_spreads = pd.DataFrame({'away_team':away_teams,
+                  'home_team':home_teams,
+                   'game_date':gm_date,
+                  'away_1H_spread':away_spreads,
+                  'home_1H_spread':home_spreads})
+   
+    for col in todays_spreads[['away_1H_spread', 'home_1H_spread']].columns:
+        todays_spreads[col] = todays_spreads[col].astype(str)
+        todays_spreads[col] = todays_spreads[col].str.replace("[", "")
+        todays_spreads[col] = todays_spreads[col].str.replace("]", "")
+        todays_spreads[col] = todays_spreads[col].str.strip()
+        
+    return todays_spreads

@@ -65,6 +65,8 @@ def clean_spread_data(df):
     full_df['away_spread_mode'] = full_df[['away_spread1', 'away_spread2', 'away_spread3', 'away_spread4']].mode(axis=1)[0]
     full_df['home_spread_mode'] = full_df[['home_spread1', 'home_spread2', 'home_spread3', 'home_spread4']].mode(axis=1)[0]
 
+    full_df['game_date'] = pd.to_datetime(full_df['game_date'])
+    
     return full_df
 
 

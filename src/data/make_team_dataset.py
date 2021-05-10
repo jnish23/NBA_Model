@@ -128,6 +128,22 @@ def create_matchups(df):
     df = df.copy()
     matchups = pd.merge(df, df, on=['GAME_ID'], suffixes=['_team', '_opp'])
     matchups = matchups.loc[matchups['TEAM_ABBREVIATION_team'] != matchups['TEAM_ABBREVIATION_opp']]
+    
+    matchups = matchups.drop(columns = ['home_team_team', 'away_team_team', 'game_date_x_team',
+                             'away_ml_mode_team', 'home_ml_mode_team', 'game_date_y_team',
+                             'away_spread_mode_team', 'home_spread_mode_team', 
+                             'SEASON_YEAR_opp', 'SEASON_ID_opp', 'TEAM_ID_opp',
+                             'TEAM_ABBREVIATION_opp', 'TEAM_NAME_opp', 'GAME_DATE_opp',
+                             'MATCHUP_opp', 'HOME_GAME_opp', 'TEAM_SCORE_opp', 
+                             'point_diff_opp', 'WL_opp', 'MIN_opp', 'home_team_opp',
+                             'away_team_opp', 'game_date_x_opp', 'away_ml_mode_opp',
+                             'home_ml_mode_opp', 'game_date_y_opp', 'away_spread_mode_opp',
+                             'home_spread_mode_opp', 'ml_opp',
+                             'spread_opp', 'MIN_team', 'OFF_RATING_team',
+                             'DEF_RATING_team', 'NET_RATING_team', 'OFF_RATING_opp',
+                             'DEF_RATING_opp', 'NET_RATING_opp']
+                 )
+    
     return matchups
 
 
