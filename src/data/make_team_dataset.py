@@ -132,7 +132,7 @@ def create_matchups(df):
     matchups = matchups.drop(columns = ['home_team_team', 'away_team_team', 'game_date_x_team',
                              'away_ml_mode_team', 'home_ml_mode_team', 'game_date_y_team',
                              'away_spread_mode_team', 'home_spread_mode_team', 
-                             'SEASON_YEAR_opp', 'SEASON_ID_opp', 'TEAM_ID_opp',
+                             'SEASON_YEAR_opp', 'TEAM_ID_opp',
                              'TEAM_ABBREVIATION_opp', 'TEAM_NAME_opp', 'GAME_DATE_opp',
                              'MATCHUP_opp', 'HOME_GAME_opp', 'TEAM_SCORE_opp', 
                              'point_diff_opp', 'WL_opp', 'MIN_opp', 'home_team_opp',
@@ -150,7 +150,7 @@ def create_matchups(df):
 def get_team_and_opp_avg(df, min_periods=5):
     df = df.copy()
 
-    df = df.drop(columns = ['SEASON_YEAR_opp', 'SEASON_ID_opp', 
+    df = df.drop(columns = ['SEASON_YEAR_opp', 
                             'TEAM_ID_opp', 'TEAM_ABBREVIATION_opp',
                             'TEAM_NAME_opp', 'GAME_DATE_opp', 
                             'MATCHUP_opp', 'WL_opp', 'HOME_GAME_opp',
