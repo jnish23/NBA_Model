@@ -1,6 +1,14 @@
 import numpy as np
 import pandas as pd
 
+def convert_to_float(x):
+    if x[0] == '+':
+        return x[1:]
+    elif x[0] == '-':
+        return int(x)
+    else:
+        return np.nan
+
 
 def clean_spread_data(df):
 
@@ -67,6 +75,7 @@ def clean_spread_data(df):
 
     full_df['game_date'] = pd.to_datetime(full_df['game_date'])
     
+    
     return full_df
 
 
@@ -110,5 +119,12 @@ def clean_moneyline_data(df):
         ml_df.loc[ml_df[col] == ' -', col] = np.nan
         ml_df.loc[ml_df[col] == '-', col] = np.nan
         ml_df.loc[ml_df[col] == '', col] = np.nan
+        
+    for col in ml_df.columns[3:11]:
+        ml_df[col] = ml_df[col].astype(str).apply(convert_to_float)
+        ml_df[col] = ml_df[col].astype(float)
+
+    ml_df['away_ml_mode'] = ml_df.iloc[:, 3:7].mode(axis=1)[0]
+    ml_df['home_ml_mode'] = ml_df.iloc[:, 7:11].mode(axis=1)[0]
     
     return ml_df

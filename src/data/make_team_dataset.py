@@ -108,7 +108,7 @@ def prep_for_aggregation(df):
     df['RECORD'] = df['WL']
     df['TEAM_SCORE'] = df['PTS']
     
-    df = df[['SEASON_YEAR', 'SEASON_ID', 'TEAM_ID',
+    df = df[['SEASON_YEAR', 'TEAM_ID',
       'TEAM_ABBREVIATION', 'TEAM_NAME', 'GAME_ID', 'GAME_DATE',
       'MATCHUP', 'HOME_GAME', 'TEAM_SCORE', 'point_diff', 'WL', 'MIN', 'RECORD',
       'FG2M', 'FG2A', 'FG3M', 'FG3A', 'FTM', 'FTA',
