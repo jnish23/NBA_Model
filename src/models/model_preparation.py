@@ -33,7 +33,7 @@ def get_days_spreads(date):
     date: "yyyy-mm-dd"
     OUPUTS: dataframe with game spreads
     """
-    gm_date = []
+    gm_dates = []
     away_teams = []
     home_teams = []
     away_spreads = []
@@ -59,7 +59,7 @@ def get_days_spreads(date):
         home_team = event.find_elements_by_class_name('participantBox-3ar9Y')[1].text
         away_teams.append(away_team)
         home_teams.append(home_team)
-        gm_date.append(date)
+        gm_dates.append(date)
 
         spreads = event.find_elements_by_class_name('pointer-2j4Dk')
         away_lines = []
@@ -69,18 +69,23 @@ def get_days_spreads(date):
                 away_lines.append(spreads[i].text)
             else:
                 home_lines.append(spreads[i].text)
+
+        away_lines = ",".join(away_lines)
+        home_lines = ",".join(home_lines)
+
         away_spreads.append(away_lines)
         home_spreads.append(home_lines)
 
+
     driver.quit()
 
-    todays_spreads = pd.DataFrame({'away_team':away_teams,
-                      'home_team':home_teams,
-                       'game_date':gm_date,
-                      'away_spread':away_spreads,
-                      'home_spread':home_spreads})
+    todays_spreads = pd.DataFrame({'GM_DATE':gm_dates,
+                      'AWAY_TEAM':away_teams,
+                      'HOME_TEAM':home_teams,
+                      'AWAY_SPREAD':away_spreads,
+                      'HOME_SPREAD':home_spreads})
 
-    for col in todays_spreads[['away_spread', 'home_spread']].columns:
+    for col in todays_spreads[['AWAY_SPREAD', 'HOME_SPREAD']].columns:
         todays_spreads[col] = todays_spreads[col].astype(str)
         todays_spreads[col] = todays_spreads[col].str.replace("[", "")
         todays_spreads[col] = todays_spreads[col].str.replace("]", "")
@@ -89,63 +94,73 @@ def get_days_spreads(date):
     return todays_spreads
 
 
-
-def get_days_spreads_1H(date):
+def get_days_moneylines(date):
     """INPUTS
     date: "yyyy-mm-dd"
-    OUPUTS: dataframe with game 1H spreads
+    OUPUTS: dataframe with game spreads
     """
-    gm_date = []
+    gm_dates = []
     away_teams = []
     home_teams = []
-    away_spreads = []
-    home_spreads = []
+    away_mls = []
+    home_mls = []
     
-    web = 'https://www.sportsbookreview.com/betting-odds/nba-basketball/pointspread/1st-half/?date={}'.format(date)
+    web = 'https://www.sportsbookreview.com/betting-odds/nba-basketball/money-line/?date={}'.format(
+        date)
     path = '../chromedriver.exe'
     driver = webdriver.Chrome(path)
     driver.get(web)
-    sleep(2)
-
-
+    sleep(3)
+    
     single_row_events = driver.find_elements_by_class_name('eventMarketGridContainer-3QipG')
-
-    num_postponed_events = len(driver.find_elements_by_class_name('eventStatus-3EHqw'))
+    
+    num_postponed_events = len(
+        driver.find_elements_by_class_name('eventStatus-3EHqw'))
 
     num_listed_events = len(single_row_events)
     cutoff = num_listed_events - num_postponed_events
 
     for event in single_row_events[:cutoff]:
+        away_team = event.find_elements_by_class_name(
+            'participantBox-3ar9Y')[0].text
+        home_team = event.find_elements_by_class_name(
+            'participantBox-3ar9Y')[1].text
 
-        away_team = event.find_elements_by_class_name('participantBox-3ar9Y')[0].text
-        home_team = event.find_elements_by_class_name('participantBox-3ar9Y')[1].text
         away_teams.append(away_team)
         home_teams.append(home_team)
-        gm_date.append(date)
 
-        spreads = event.find_elements_by_class_name('pointer-2j4Dk')
-        away_lines = []
-        home_lines = []
-        for i in range(len(spreads)):    
+        gm_dates.append(date)
+
+        mls = event.find_elements_by_class_name('pointer-2j4Dk')
+
+        away_moneyline = []
+        home_moneyline = []
+
+        for i, ml in enumerate(mls):
             if i % 2 == 0:
-                away_lines.append(spreads[i].text)
+                away_moneyline.append(ml.text)
             else:
-                home_lines.append(spreads[i].text)
-        away_spreads.append(away_lines)
-        home_spreads.append(home_lines)
+                home_moneyline.append(ml.text)
+
+        away_moneyline = ",".join(away_moneyline)
+        home_moneyline = ",".join(home_moneyline)
+
+        away_mls.append(away_moneyline)
+        home_mls.append(home_moneyline)
 
     driver.quit()
 
-    todays_spreads = pd.DataFrame({'away_team':away_teams,
-                  'home_team':home_teams,
-                   'game_date':gm_date,
-                  'away_1H_spread':away_spreads,
-                  'home_1H_spread':home_spreads})
-   
-    for col in todays_spreads[['away_1H_spread', 'home_1H_spread']].columns:
-        todays_spreads[col] = todays_spreads[col].astype(str)
-        todays_spreads[col] = todays_spreads[col].str.replace("[", "")
-        todays_spreads[col] = todays_spreads[col].str.replace("]", "")
-        todays_spreads[col] = todays_spreads[col].str.strip()
+    todays_moneylines = pd.DataFrame({'GM_DATE': gm_dates,
+                       'AWAY_TEAM': away_teams,
+                      'HOME_TEAM': home_teams,
+                       'AWAY_ML': away_mls,
+                       'HOME_ML': home_mls,
+                       })
+
+    for col in todays_moneylines[['AWAY_ML', 'HOME_ML']].columns:
+        todays_moneylines[col] = todays_moneylines[col].astype(str)
+        todays_moneylines[col] = todays_moneylines[col].str.replace("[", "")
+        todays_moneylines[col] = todays_moneylines[col].str.replace("]", "")
+        todays_moneylines[col] = todays_moneylines[col].str.strip()
         
-    return todays_spreads
+    return todays_moneylines
