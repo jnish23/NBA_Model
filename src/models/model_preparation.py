@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from selenium import webdriver
 from time import sleep
 
@@ -164,3 +165,87 @@ def get_days_moneylines(date):
         todays_moneylines[col] = todays_moneylines[col].str.strip()
         
     return todays_moneylines
+
+
+def get_draftking_lines(date):
+    """
+    INPUTS
+    date: "yyyy-mm-dd"
+    OUPUTS 
+    dataframe with game spreads
+    """
+    gm_dates = []
+    away_teams = []
+    home_teams = []
+    away_spreads = []
+    home_spreads = []
+    away_moneylines = []
+    home_moneylines = []
+
+    web = 'https://sportsbook.draftkings.com/leagues/basketball/88670846?category=game-lines&subcategory=game'
+    path = '../chromedriver.exe'
+    driver = webdriver.Chrome(path)
+    driver.get(web)
+    sleep(2)
+
+    teams = driver.find_elements_by_xpath('//*[@id="root"]/section/section[2]/section/div[3]/div/div[3]/div/div/div[2]/div/div[2]/div[1]/table/tbody/tr/th/a/div/div[2]/span/div/div')
+    spreads = driver.find_elements_by_xpath('//*[@id="root"]/section/section[2]/section/div[3]/div/div[3]/div/div/div[2]/div/div[2]/div[1]/table/tbody/tr/td[1]/div/div/div/div[1]/span')
+    moneylines = driver.find_elements_by_xpath('//*[@id="root"]/section/section[2]/section/div[3]/div/div[3]/div/div/div[2]/div/div[2]/div[1]/table/tbody/tr/td[3]/div/div/div/div/div[2]/span')
+
+    for i in range(len(teams)):
+        if i%2==0:
+            away_teams.append(teams[i].text)
+            away_spreads.append(spreads[i].text)
+            away_moneylines.append(moneylines[i].text)
+            gm_dates.append(date)
+        else:
+            home_teams.append(teams[i].text)
+            home_spreads.append(spreads[i].text)
+            home_moneylines.append(moneylines[i].text)    
+
+    driver.quit()
+
+    todays_lines = pd.DataFrame({"game_date":gm_dates,
+                'away_team':away_teams,
+                'home_team':home_teams,
+                'away_spread':away_spreads,
+                'home_spread':home_spreads,
+                'away_moneyline':away_moneylines,
+                'home_moneyline':home_moneylines})
+    
+    return todays_lines
+
+
+def clean_draftking_lines(df):
+    
+    abbr_mapping = {'Celtics': 'BOS', 'Trail Blazers': 'POR',
+                    'Lakers': 'LAL', 'Nets': 'BKN',
+                    'Cavaliers': 'CLE', 'Raptors': 'TOR',
+                    '76ers': 'PHI', 'Grizzlies': 'MEM',
+                    'Timberwolves': 'MIN', 'Pelicans': 'NOP',
+                    'Thunder': 'OKC', 'Mavericks': 'DAL',
+                    'Spurs': 'SAS', 'Nuggets': 'DEN',
+                    'Warriors': 'GSW', 'Clippers': 'LAC',
+                    'Magic': 'ORL', 'Jazz': 'UTA',
+                    'Hornets': 'CHA', 'Pistons': 'DET',
+                    'Heat': 'MIA', 'Suns': 'PHX',
+                    'Hawks': 'ATL', 'Knicks': 'NYK',
+                    'Pacers': 'IND', 'Bulls': 'CHI',
+                    'Rockets': 'HOU', 'Bucks': 'MIL',
+                    'Kings': 'SAC', 'Wizards': 'WAS'}
+    
+    
+    df['away_team'] = df['away_team'].str[3:].str.strip()
+    df['home_team'] = df['home_team'].str[3:].str.strip()
+    df['away_team'] = df['away_team'].replace(abbr_mapping)
+    df['home_team'] = df['home_team'].replace(abbr_mapping)
+
+    df['away_spread'] = df['away_spread'].str.replace('pk', '0', regex=False).astype(float)
+    df['home_spread'] = df['home_spread'].str.replace('pk', '0', regex=False).astype(float)
+    df['away_moneyline'] = convert_american_to_decimal(df['away_moneyline'].astype(int))
+    df['home_moneyline'] = convert_american_to_decimal(df['home_moneyline'].astype(int))
+    
+    return df
+
+def convert_american_to_decimal(x):
+    return np.where(x>0, (100+x)/100, 1+(100.0/-x))      

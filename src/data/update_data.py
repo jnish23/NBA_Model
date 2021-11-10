@@ -36,12 +36,11 @@ def update_team_basic_boxscores(conn, season):
     
     cur = conn.cursor()
     cur.execute(f'''DELETE FROM {table_name} 
-                    WHERE rowid NOT IN (SELECT MIN(rowid) FROM {table_name} 
+                    WHERE rowid NOT IN (SELECT MAX(rowid) FROM {table_name} 
                                         GROUP BY TEAM_NAME, GAME_ID, GAME_DATE, MATCHUP)''')
     conn.commit()
     
     return None
-
 
 
 def update_team_advanced_boxscores(conn, season):
@@ -84,7 +83,7 @@ def update_team_advanced_boxscores(conn, season):
             game_ids_not_added.append(game_id)  
     
     cur = conn.cursor()
-    cur.execute(f'''DELETE FROM {table_name} WHERE rowid NOT IN (SELECT min(rowid) FROM {table_name} GROUP BY TEAM_ID, GAME_ID)''')
+    cur.execute(f'''DELETE FROM {table_name} WHERE rowid NOT IN (SELECT MAX(rowid) FROM {table_name} GROUP BY TEAM_ID, GAME_ID)''')
     conn.commit()
     
     return game_ids_not_added
@@ -105,7 +104,7 @@ def update_team_scoring_boxscores(conn, season):
                 WHERE SEASON = "{season_str}"''', conn)
 
     game_ids_in_db = game_ids_in_db['GAME_ID'].tolist()
-#     print(game_ids_in_db)
+    
     # get up to date GAME_IDs
     to_date_game_ids = []
     for season_type in ['Regular Season', 'Playoffs']:
@@ -130,7 +129,7 @@ def update_team_scoring_boxscores(conn, season):
             game_ids_not_added.append(game_id)  
             
     cur = conn.cursor()
-    cur.execute(f'''DELETE FROM {table_name} WHERE rowid NOT IN (SELECT min(rowid) FROM {table_name} GROUP BY TEAM_ID, GAME_ID)''')
+    cur.execute(f'''DELETE FROM {table_name} WHERE rowid NOT IN (SELECT MAX(rowid) FROM {table_name} GROUP BY TEAM_ID, GAME_ID)''')
     conn.commit()    
     
     return game_ids_not_added
@@ -173,14 +172,6 @@ def update_moneylines(conn, season=2021, custom_dates=[]):
         
         missing_dates = merged_df.loc[merged_df['AWAY_ML'].isnull(), 'GAME_DATE'].unique().tolist()
         
-#         current_dates = current_dates['GM_DATE'].tolist()
-
-#         up_to_date_dates = get_game_dates(season)
-
-#         missing_dates = set(up_to_date_dates) - set(current_dates)
-
-#         print("Updating moneylines for {} days".format(len(missing_dates)))
-
     else:
         missing_dates = custom_dates
 
@@ -267,7 +258,7 @@ def update_moneylines(conn, season=2021, custom_dates=[]):
 
     cur = conn.cursor()
     cur.execute('''DELETE FROM moneylines 
-                    WHERE rowid NOT IN (SELECT MIN(rowid) FROM moneylines
+                    WHERE rowid NOT IN (SELECT MAX(rowid) FROM moneylines
                                         GROUP BY GM_DATE, AWAY_TEAM, HOME_TEAM, AWAY_ML, HOME_ML)''')
     conn.commit()
 
@@ -424,7 +415,7 @@ def update_spreads(conn, season, custom_dates=[]):
     
     cur = conn.cursor()
     cur.execute('''DELETE FROM spreads 
-                    WHERE rowid NOT IN (SELECT MIN(rowid) FROM spreads 
+                    WHERE rowid NOT IN (SELECT MAX(rowid) FROM spreads 
                                         GROUP BY GM_DATE, AWAY_TEAM, HOME_TEAM, AWAY_SPREAD, HOME_SPREAD)''')
     conn.commit()
     
@@ -442,6 +433,7 @@ def update_all_data(conn, season):
     update_moneylines(conn, season, custom_dates=[])
     print("updating spreads data")
     update_spreads(conn, season, custom_dates=[])
+    
 
 def season_string(season):
     return str(season) + '-' + str(season+1)[-2:]
