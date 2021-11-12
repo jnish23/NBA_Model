@@ -2,13 +2,13 @@ import sqlite3
 import pandas as pd
 import numpy as np
 
-def load_team_data(conn):
+def load_team_data(conn, start_season, end_season):
     """Loads basic, advanced, and scoring boxscores 
-    from sqlite db and merges them into one dataframe"""
+    from sqlite database and merges them into one dataframe"""
 
-    basic = pd.read_sql("SELECT * FROM team_basic_boxscores", connection)
-    adv = pd.read_sql("SELECT * FROM team_advanced_boxscores", connection)
-    scoring = pd.read_sql("SELECT * FROM team_scoring_boxscores", connection)
+    basic = pd.read_sql("SELECT * FROM team_basic_boxscores", conn)
+    adv = pd.read_sql("SELECT * FROM team_advanced_boxscores", conn)
+    scoring = pd.read_sql("SELECT * FROM team_scoring_boxscores", conn)
 
     temp = pd.merge(basic, adv, how='left', on=[
                     'GAME_ID', 'TEAM_ID'], suffixes=['', '_y'])
@@ -18,9 +18,22 @@ def load_team_data(conn):
     df = df.drop(columns=['TEAM_NAME_y', 'TEAM_CITY',
                           'TEAM_ABBREVIATION_y',
                           'TEAM_CITY_y', 'MIN_y'])
+    
+    
+    df = df.loc[df['SEASON'].between(season_string(start_season), season_string(end_season))]
+    
+ 
     return df
 
 
+def load_betting_data(conn):
+    """Loads betting data (spreads and moneylines) from sqlite database"""
+    spreads = pd.read_sql("SELECT * FROM spreads", conn)
+    moneylines = pd.read_sql("SELECT * FROM moneylines", conn)
+
+    return spreads, moneylines
+            
+    
 def clean_team_data(df):
     """This function cleans the team_data
     1) Changes W/L to 1/0 
@@ -242,8 +255,48 @@ def merge_betting_and_boxscore_data(clean_spreads, clean_mls, clean_boxscores):
     return merged_df
 
 
+def create_matchups(df):
+    """This function makes each row a matchup between 
+    team and opp"""
+    df = df.copy()
+    
+
+    matchups = pd.merge(df, df, on=['GAME_ID'], suffixes=['_team', '_opp'])
+    matchups = matchups.loc[matchups['TEAM_ABBREVIATION_team'] != matchups['TEAM_ABBREVIATION_opp']]
+
+    matchups = matchups.drop(columns = ['SEASON_opp', 'TEAM_ID_opp',
+                             'TEAM_ABBREVIATION_opp', 'TEAM_NAME_opp', 'GAME_DATE_opp',
+                             'MATCHUP_opp', 'HOME_GAME_opp', 'TEAM_SCORE_opp', 
+                             'POINT_DIFF_opp', 'WL_opp',
+                             'ML_opp', 'SPREAD_opp', 'OFF_RATING_team',
+                             'DEF_RATING_team', 'NET_RATING_team', 'OFF_RATING_opp',
+                             'DEF_RATING_opp', 'NET_RATING_opp'])
+    
+    return matchups
 
 
 def convert_american_to_decimal(x):
     return np.where(x>0, (100+x)/100, 1+(100.0/-x))                    
                 
+    
+def season_string(season):
+    return str(season) + '-' + str(season+1)[-2:]
+
+
+def process_data_main(conn, start_season, end_season):
+    df = load_team_data(conn, start_season, end_season)
+
+    df = clean_team_data(df)
+    df = prep_for_aggregation(df)
+    
+    spreads, moneylines = load_betting_data(conn)
+    clean_moneylines = clean_moneyline_df(moneylines)
+    clean_spreads = clean_spreads_df(spreads)
+    
+    full_df = merge_betting_and_boxscore_data(clean_spreads, clean_moneylines, df)
+    
+    matchups = create_matchups(full_df)
+    
+    return matchups
+
+

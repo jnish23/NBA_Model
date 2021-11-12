@@ -1,11 +1,10 @@
 from src.models.model_preparation import get_draftking_lines, clean_draftking_lines
-from src.models.model_preparation import get_days_spreads, get_days_moneylines
-from src.features.create_features import create_matchups, get_team_and_opp_ewm, add_percentage_features
+from src.features.generate_features import get_team_and_opp_ewm, add_percentage_features
 from src.data.update_data import update_all_data
-from src.data.process_data import clean_team_data, prep_for_aggregation
+from src.data.process_data import clean_team_data, prep_for_aggregation, create_matchups
 from src.data.process_data import clean_moneyline_df, clean_spreads_df
 from src.data.process_data import merge_betting_and_boxscore_data
-from src.data.generate_elo_ratings import *
+from src.features.generate_elo_ratings import *
 from datetime import datetime, date
 import pandas as pd
 import numpy as np
