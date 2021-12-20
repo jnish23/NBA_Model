@@ -22,6 +22,8 @@ All of the data is stored in a sqlite database nba.db
 ## Results
 This project is still in progress. This will be updated as I continue to work on it.
 
+
+
 ## Tools
 
 This project is built using a number of different Python libraries, all in the [Jupyter Notebook](https://jupyter.org/) format.
