@@ -1,6 +1,8 @@
 import sqlite3
 import pandas as pd
 import numpy as np
+import warnings
+
 
 def load_team_data(conn, start_season, end_season):
     """Loads basic, advanced, and scoring boxscores 
@@ -140,18 +142,21 @@ def clean_moneyline_df(df):
     home_mls = home_mls.replace('-', np.nan).replace('', np.nan)
     home_mls = home_mls.fillna(value=np.nan)
     home_mls = home_mls.astype(float)
+    
+    
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        highest_away_ml = away_mls.apply(lambda row: np.nanmax(
+            abs(row)) if np.nanmax(row) > 0 else -np.nanmax(abs(row)), axis=1)
+        highest_away_ml = convert_american_to_decimal(highest_away_ml)
+        highest_away_ml = pd.DataFrame(
+            highest_away_ml, columns=['HIGHEST_AWAY_ML'])
 
-    highest_away_ml = away_mls.apply(lambda row: np.nanmax(
-        abs(row)) if np.nanmax(row) > 0 else -np.nanmax(abs(row)), axis=1)
-    highest_away_ml = convert_american_to_decimal(highest_away_ml)
-    highest_away_ml = pd.DataFrame(
-        highest_away_ml, columns=['HIGHEST_AWAY_ML'])
-
-    highest_home_ml = home_mls.apply(lambda row: np.nanmax(
-        abs(row)) if np.nanmax(row) > 0 else -np.nanmax(abs(row)), axis=1)
-    highest_home_ml = convert_american_to_decimal(highest_home_ml)
-    highest_home_ml = pd.DataFrame(
-        highest_home_ml, columns=['HIGHEST_HOME_ML'])
+        highest_home_ml = home_mls.apply(lambda row: np.nanmax(
+            abs(row)) if np.nanmax(row) > 0 else -np.nanmax(abs(row)), axis=1)
+        highest_home_ml = convert_american_to_decimal(highest_home_ml)
+        highest_home_ml = pd.DataFrame(
+            highest_home_ml, columns=['HIGHEST_HOME_ML'])
 
     moneylines = pd.concat(
         [df.iloc[:, :4], highest_home_ml, highest_away_ml], axis=1)
@@ -208,15 +213,18 @@ def clean_spreads_df(df):
 
     home_spreads = home_spreads.astype(float)
 
-    highest_away_spread = away_spreads.apply(
-        lambda row: -np.nanmax(abs(row)) if np.nanmax(row) < 0 else np.nanmax(abs(row)), axis=1)
-    highest_away_spread = pd.DataFrame(
-        highest_away_spread, columns=['HIGHEST_AWAY_SPREAD'])
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        highest_away_spread = away_spreads.apply(
+            lambda row: -np.nanmax(abs(row)) if np.nanmax(row) < 0 else np.nanmax(abs(row)), axis=1)
+        
+        highest_away_spread = pd.DataFrame(
+            highest_away_spread, columns=['HIGHEST_AWAY_SPREAD'])
 
-    highest_home_spread = home_spreads.apply(
-        lambda row: -np.nanmax(abs(row)) if np.nanmax(row) < 0 else np.nanmax(abs(row)), axis=1)
-    highest_home_spread = pd.DataFrame(
-        highest_home_spread, columns=['HIGHEST_HOME_SPREAD'])
+        highest_home_spread = home_spreads.apply(
+            lambda row: -np.nanmax(abs(row)) if np.nanmax(row) < 0 else np.nanmax(abs(row)), axis=1)
+        highest_home_spread = pd.DataFrame(
+            highest_home_spread, columns=['HIGHEST_HOME_SPREAD'])
 
     spreads = pd.concat(
         [df.iloc[:, :4], highest_home_spread, highest_away_spread], axis=1)

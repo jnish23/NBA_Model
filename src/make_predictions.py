@@ -58,7 +58,7 @@ def add_rest_days_for_model(df):
     for team in df['TEAM_ABBREVIATION_team'].unique():
         team_df = df.loc[df['TEAM_ABBREVIATION_team'] == team].sort_values('GAME_DATE_team')
         idx = team_df.index
-        team_df['rest'] = (team_df['GAME_DATE_team'].shift(-1) - team_df['GAME_DATE_team']) / np.timedelta64(1, 'D')
+        team_df['REST'] = (team_df['GAME_DATE_team'].shift(-1) - team_df['GAME_DATE_team']) / np.timedelta64(1, 'D')
         team_df.at[max(idx), 'REST'] = (pd.to_datetime(date.today()) - team_df.at[max(idx), 'GAME_DATE_team']) / np.timedelta64(1, 'D')
 
         df.loc[idx, 'REST'] = team_df['REST']
