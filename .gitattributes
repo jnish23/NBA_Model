@@ -1,6 +1,0 @@
-nba_betting_data_2013_2020.csv filter=lfs diff=lfs merge=lfs -text
-player_boxscores_wideform.csv filter=lfs diff=lfs merge=lfs -text
-predictions.csv filter=lfs diff=lfs merge=lfs -text
-full_player_last10_avg_matchup.csv filter=lfs diff=lfs merge=lfs -text
-matchup_last10_average.csv filter=lfs diff=lfs merge=lfs -text
-*.csv filter=lfs diff=lfs merge=lfs -text
